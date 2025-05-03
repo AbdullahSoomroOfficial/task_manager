@@ -1,0 +1,72 @@
+{% extends 'tasks/base.html' %} {% block title %}Categories | Task Manager
+{%endblock %} {% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800">Categories</h1>
+  <a
+    href="{% url 'category_create' %}"
+    class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"
+  >
+    <i class="fas fa-plus fa-sm text-white-50"></i> New Category
+  </a>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Category List</h6>
+      </div>
+      <div class="card-body">
+        {% if categories %}
+        <div class="table-responsive">
+          <table class="table table-bordered" width="100%" cellspacing="0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Tasks</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for category in categories %}
+              <tr>
+                <td>{{ category.name }}</td>
+                <td>{{ category.task_count }}</td>
+                <td>
+                  <div class="btn-group" role="group">
+                    <a
+                      href="{% url 'category_edit' category.id %}"
+                      class="btn btn-sm btn-info"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <a
+                      href="{% url 'category_delete' category.id %}"
+                      class="btn btn-sm btn-danger"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </a>
+                    <a
+                      href="{% url 'task_list' %}?category={{ category.id }}"
+                      class="btn btn-sm btn-secondary"
+                    >
+                      <i class="fas fa-tasks"></i> View Tasks
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+          No categories found.
+          <a href="{% url 'category_create' %}">Create your first category</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

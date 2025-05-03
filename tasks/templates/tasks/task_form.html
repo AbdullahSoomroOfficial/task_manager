@@ -1,0 +1,86 @@
+{% extends 'tasks/base.html' %}
+
+{% block title %}{{ title }} | Task Manager{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                        <input type="text" name="{{ form.title.name }}" class="form-control {% if form.title.errors %}is-invalid{% endif %}" id="{{ form.title.id_for_label }}" value="{{ form.title.value|default:'' }}">
+                        {% if form.title.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.title.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                        <textarea name="{{ form.description.name }}" class="form-control {% if form.description.errors %}is-invalid{% endif %}" id="{{ form.description.id_for_label }}" rows="4">{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.description.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.due_date.id_for_label }}" class="form-label">Due Date</label>
+                            <input type="datetime-local" name="{{ form.due_date.name }}" class="form-control {% if form.due_date.errors %}is-invalid{% endif %}" id="{{ form.due_date.id_for_label }}" value="{{ form.due_date.value|date:'Y-m-d\TH:i' }}">
+                            {% if form.due_date.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.due_date.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.priority.id_for_label }}" class="form-label">Priority</label>
+                            <select name="{{ form.priority.name }}" class="form-select {% if form.priority.errors %}is-invalid{% endif %}" id="{{ form.priority.id_for_label }}">
+                                {% for value, text in form.priority.field.choices %}
+                                    <option value="{{ value }}" {% if form.priority.value == value %}selected{% endif %}>{{ text }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if form.priority.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.priority.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                        <select name="{{ form.category.name }}" class="form-select {% if form.category.errors %}is-invalid{% endif %}" id="{{ form.category.id_for_label }}">
+                            <option value="">-- No Category --</option>
+                            {% for category in form.category.field.queryset %}
+                                <option value="{{ category.pk }}" {% if form.category.value|stringformat:'i' == category.pk|stringformat:'i' %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.category.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.category.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'task_list' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

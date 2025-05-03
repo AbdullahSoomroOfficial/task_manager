@@ -1,0 +1,144 @@
+{% extends 'tasks/base.html' %}
+
+{% block title %}Tasks | Task Manager{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Tasks</h1>
+    <a href="{% url 'task_create' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <i class="fas fa-plus fa-sm text-white-50"></i> New Task
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Task List</h6>
+    </div>
+    <div class="card-body">
+        <!-- Search and Filters -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <form method="get" class="d-flex">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Search tasks..." value="{{ search_query }}">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-end">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'task_list' %}" class="btn btn-outline-secondary {% if not filter_status %}active{% endif %}">All</a>
+                        <a href="{% url 'task_list' %}?status=pending" class="btn btn-outline-warning {% if filter_status == 'pending' %}active{% endif %}">Pending</a>
+                        <a href="{% url 'task_list' %}?status=completed" class="btn btn-outline-success {% if filter_status == 'completed' %}active{% endif %}">Completed</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Filters -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'task_list' %}" class="btn btn-outline-secondary {% if not filter_priority %}active{% endif %}">All Priorities</a>
+                    <a href="{% url 'task_list' %}?priority=high" class="btn btn-outline-danger {% if filter_priority == 'high' %}active{% endif %}">High</a>
+                    <a href="{% url 'task_list' %}?priority=medium" class="btn btn-outline-warning {% if filter_priority == 'medium' %}active{% endif %}">Medium</a>
+                    <a href="{% url 'task_list' %}?priority=low" class="btn btn-outline-success {% if filter_priority == 'low' %}active{% endif %}">Low</a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <form method="get" class="d-flex justify-content-end">
+                    <select name="category" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if filter_category == category.id|stringformat:"i" %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Task List -->
+        {% if tasks %}
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Title</th>
+                            <th>Priority</th>
+                            <th>Category</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                            <tr class="{% if task.completed %}table-success{% endif %}">
+                                <td>
+                                    <form method="post" action="{% url 'task_toggle_complete' task.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-link p-0">
+                                            {% if task.completed %}
+                                                <i class="fas fa-check-circle text-success"></i>
+                                            {% else %}
+                                                <i class="far fa-circle text-secondary"></i>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="{% if task.completed %}task-completed{% endif %}">{{ task.title }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if task.priority == 'high' %}bg-danger
+                                        {% elif task.priority == 'medium' %}bg-warning
+                                        {% else %}bg-success{% endif %}">
+                                        {{ task.get_priority_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if task.category %}
+                                        {{ task.category.name }}
+                                    {% else %}
+                                        <span class="text-muted">None</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if task.due_date %}
+                                        {{ task.due_date|date:"M d, Y" }}
+                                    {% else %}
+                                        <span class="text-muted">No due date</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'task_edit' task.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'task_delete' task.id %}" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No tasks found. 
+                {% if search_query or filter_status or filter_priority or filter_category %}
+                    <a href="{% url 'task_list' %}">Clear filters</a>
+                {% else %}
+                    <a href="{% url 'task_create' %}">Create your first task</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

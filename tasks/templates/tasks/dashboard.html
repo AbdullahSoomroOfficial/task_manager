@@ -1,0 +1,216 @@
+{% extends 'tasks/base.html' %} {% block title %}Dashboard | Task Manager
+{%endblock %} {% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+  <a
+    href="{% url 'task_create' %}"
+    class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"
+  >
+    <i class="fas fa-plus fa-sm text-white-50"></i> New Task
+  </a>
+</div>
+
+<div class="row">
+  <!-- Total Tasks Card -->
+  <div class="col-xl-4 col-md-6 mb-4">
+    <div class="card border-left-primary shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div
+              class="text-xs font-weight-bold text-primary text-uppercase mb-1"
+            >
+              Total Tasks
+            </div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">
+              {{ tasks_total }}
+            </div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completed Tasks Card -->
+  <div class="col-xl-4 col-md-6 mb-4">
+    <div class="card border-left-success shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div
+              class="text-xs font-weight-bold text-success text-uppercase mb-1"
+            >
+              Completed Tasks
+            </div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">
+              {{ tasks_completed }}
+            </div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Tasks Card -->
+  <div class="col-xl-4 col-md-6 mb-4">
+    <div class="card border-left-warning shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div
+              class="text-xs font-weight-bold text-warning text-uppercase mb-1"
+            >
+              Pending Tasks
+            </div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">
+              {{ tasks_pending }}
+            </div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-clock fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Priority Stats -->
+  <div class="col-lg-6 mb-4">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tasks by Priority</h6>
+      </div>
+      <div class="card-body">
+        <h4 class="small font-weight-bold">
+          High Priority <span class="float-end">{{ high_priority }}</span>
+        </h4>
+        <div class="progress mb-4">
+          <div
+            class="progress-bar bg-danger"
+            role="progressbar"
+            style="width: {% if tasks_pending %}{{ high_priority|floatformat:0 }}{% else %}0{% endif %}%"
+            aria-valuenow="{{ high_priority }}"
+            aria-valuemin="0"
+            aria-valuemax="{{ tasks_pending }}"
+          ></div>
+        </div>
+        <h4 class="small font-weight-bold">
+          Medium Priority <span class="float-end">{{ medium_priority }}</span>
+        </h4>
+        <div class="progress mb-4">
+          <div
+            class="progress-bar bg-warning"
+            role="progressbar"
+            style="width: {% if tasks_pending %}{{ medium_priority|floatformat:0 }}{% else %}0{% endif %}%"
+            aria-valuenow="{{ medium_priority }}"
+            aria-valuemin="0"
+            aria-valuemax="{{ tasks_pending }}"
+          ></div>
+        </div>
+        <h4 class="small font-weight-bold">
+          Low Priority <span class="float-end">{{ low_priority }}</span>
+        </h4>
+        <div class="progress">
+          <div
+            class="progress-bar bg-success"
+            role="progressbar"
+            style="width: {% if tasks_pending %}{{ low_priority|floatformat:0 }}{% else %}0{% endif %}%"
+            aria-valuenow="{{ low_priority }}"
+            aria-valuemin="0"
+            aria-valuemax="{{ tasks_pending }}"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upcoming Tasks -->
+  <div class="col-lg-6 mb-4">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Upcoming Tasks</h6>
+      </div>
+      <div class="card-body">
+        {% if upcoming_tasks %}
+        <ul class="list-group">
+          {% for task in upcoming_tasks %}
+          <li
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            <div>
+              <span
+                class="{% if task.priority == 'high' %}priority-high{% elif task.priority == 'medium' %}priority-medium{% else %}priority-low{% endif %}"
+              >
+                <i class="fas fa-circle"></i>
+              </span>
+              {{ task.title }}
+            </div>
+            <span class="badge bg-primary rounded-pill">
+              {{ task.due_date|date:"M d, Y" }}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-center my-3">No upcoming tasks</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Categories -->
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow mb-4">
+      <div
+        class="card-header py-3 d-flex justify-content-between align-items-center"
+      >
+        <h6 class="m-0 font-weight-bold text-primary">Categories</h6>
+        <a href="{% url 'category_create' %}" class="btn btn-sm btn-primary">
+          <i class="fas fa-plus fa-sm"></i> New Category
+        </a>
+      </div>
+      <div class="card-body">
+        {% if categories %}
+        <div class="row">
+          {% for category in categories %}
+          <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+              <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                    <div
+                      class="text-xs font-weight-bold text-info text-uppercase mb-1"
+                    >
+                      {{ category.name }}
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                      {{ category.task_count }} Tasks
+                    </div>
+                  </div>
+                  <div class="col-auto">
+                    <i class="fas fa-folder fa-2x text-gray-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center my-3">No categories found</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
